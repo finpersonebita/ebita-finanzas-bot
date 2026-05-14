@@ -28,28 +28,25 @@ Categorías disponibles: {', '.join(CATEGORIAS)}
 Mensaje del usuario: "{mensaje}"
 
 Responde SOLO con este JSON (sin nada más):
-{{
-  "es_gasto": true o false,
-  "monto": número o null,
-  "categoria": "categoría" o null,
-  "descripcion": "descripción corta" o null,
-  "moneda": "PEN" o "USD"
-}}
+{{"es_gasto": true, "monto": 10, "categoria": "Transporte", "descripcion": "taxi", "moneda": "PEN"}}
 
-Reglas:
-- Si el mensaje no es un gasto, pon es_gasto: false y el resto null
-- El monto debe ser solo el número (sin "soles" ni "S/.")
-- Si dice "soles" o "S/." la moneda es PEN, si dice "$" o "dólares" es USD
-- La descripción debe ser corta (máximo 5 palabras)"""
+Adapta los valores al mensaje del usuario."""
 
-    response = anthropic_client.messages.create(
-        model="claude-haiku-4-5",
+    message = anthropic_client.messages.create(
+        model="claude-haiku-4-5-20251001",
         max_tokens=200,
         messages=[{"role": "user", "content": prompt}]
     )
 
-    resultado = json.loads(response.content[0].text.strip())
+    texto = message.content[0].text.strip()
+    print(f"Respuesta Anthropic: {texto}")
+    
+    # Limpiar posibles backticks
+    texto = texto.replace("```json", "").replace("```", "").strip()
+    
+    resultado = json.loads(texto)
     return resultado
+
 
 def guardar_gasto(telefono, monto, categoria, descripcion, moneda):
     """Guarda el gasto en Supabase."""
